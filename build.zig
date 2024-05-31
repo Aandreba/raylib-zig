@@ -15,8 +15,9 @@ fn link(
     exe: *std.Build.Step.Compile,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
+    single_threaded: ?bool,
 ) void {
-    const lib = getRaylib(b, target, optimize);
+    const lib = getRaylib(b, target, optimize, single_threaded);
 
     const target_os = exe.rootModuleTarget().os.tag;
     switch (target_os) {
@@ -63,10 +64,13 @@ fn link(
 var _raylib_lib_cache: ?*std.Build.Step.Compile = null;
 fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Step.Compile {
     if (_raylib_lib_cache) |lib| return lib else {
-        const raylib = b.dependency("raylib", .{
+        const raylib = if (single_threaded) |st| b.dependency("raylib", .{
             .target = target,
             .optimize = optimize,
-            .single_threaded = single_threaded,
+            .single_threaded = st,
+        }) else b.dependency("raylib", .{
+            .target = target,
+            .optimize = optimize,
         });
 
         const lib = raylib.artifact("raylib");
@@ -232,7 +236,7 @@ pub fn build(b: *std.Build) !void {
             exe_lib.root_module.addImport("raylib", raylib);
             exe_lib.root_module.addImport("raylib-math", raylib_math);
             exe_lib.root_module.addImport("rlgl", rlgl);
-            const raylib_lib = getRaylib(b, target, optimize);
+            const raylib_lib = getRaylib(b, target, optimize, single_threaded);
 
             // Note that raylib itself isn't actually added to the exe_lib
             // output file, so it also needs to be linked with emscripten.
@@ -253,8 +257,9 @@ pub fn build(b: *std.Build) !void {
                 .root_source_file = b.path(ex.path),
                 .optimize = optimize,
                 .target = target,
+                .single_threaded = single_threaded,
             });
-            rl.link(b, exe, target, optimize);
+            rl.link(b, exe, target, optimize, single_threaded);
             exe.root_module.addImport("raylib", raylib);
             exe.root_module.addImport("raylib-math", raylib_math);
             exe.root_module.addImport("rlgl", rlgl);
