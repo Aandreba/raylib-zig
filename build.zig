@@ -90,7 +90,7 @@ fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
 
 const math = struct {
     fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
-        const raylib = rl.getModule(b, target, optimize);
+        const raylib = rl.getModule(b, target, optimize, single_threaded);
         return b.addModule("raylib-math", .{
             .root_source_file = b.path("lib/raymath.zig"),
             .imports = &.{.{ .name = "raylib-zig", .module = raylib }},
@@ -103,7 +103,7 @@ const math = struct {
 
 const gl = struct {
     fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
-        const raylib = rl.getModule(b, target, optimize);
+        const raylib = rl.getModule(b, target, optimize, single_threaded);
         return b.addModule("rlgl", .{
             .root_source_file = b.path("lib/rlgl.zig"),
             .imports = &.{.{ .name = "raylib-zig", .module = raylib }},
