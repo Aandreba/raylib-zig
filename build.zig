@@ -64,10 +64,9 @@ fn link(
 var _raylib_lib_cache: ?*std.Build.Step.Compile = null;
 fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Step.Compile {
     if (_raylib_lib_cache) |lib| return lib else {
-        const raylib = if (single_threaded) |st| b.dependency("raylib", .{
+        const raylib = if (single_threaded) |_| b.dependency("raylib", .{
             .target = target,
             .optimize = optimize,
-            .single_threaded = st,
         }) else b.dependency("raylib", .{
             .target = target,
             .optimize = optimize,
