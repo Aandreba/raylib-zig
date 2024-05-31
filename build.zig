@@ -61,11 +61,12 @@ fn link(
 }
 
 var _raylib_lib_cache: ?*std.Build.Step.Compile = null;
-fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode) *std.Build.Step.Compile {
+fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Step.Compile {
     if (_raylib_lib_cache) |lib| return lib else {
         const raylib = b.dependency("raylib", .{
             .target = target,
             .optimize = optimize,
+            .single_threaded = single_threaded,
         });
 
         const lib = raylib.artifact("raylib");
@@ -75,7 +76,7 @@ fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
     }
 }
 
-fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode) *std.Build.Module {
+fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
     if (b.modules.contains("raylib")) {
         return b.modules.get("raylib").?;
     }
@@ -83,29 +84,32 @@ fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
         .root_source_file = b.path("lib/raylib.zig"),
         .target = target,
         .optimize = optimize,
+        .single_threaded = single_threaded,
     });
 }
 
 const math = struct {
-    fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode) *std.Build.Module {
+    fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
         const raylib = rl.getModule(b, target, optimize);
         return b.addModule("raylib-math", .{
             .root_source_file = b.path("lib/raymath.zig"),
             .imports = &.{.{ .name = "raylib-zig", .module = raylib }},
             .target = target,
             .optimize = optimize,
+            .single_threaded = single_threaded,
         });
     }
 };
 
 const gl = struct {
-    fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode) *std.Build.Module {
+    fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
         const raylib = rl.getModule(b, target, optimize);
         return b.addModule("rlgl", .{
             .root_source_file = b.path("lib/rlgl.zig"),
             .imports = &.{.{ .name = "raylib-zig", .module = raylib }},
             .target = target,
             .optimize = optimize,
+            .single_threaded = single_threaded,
         });
     }
 };
@@ -113,6 +117,7 @@ const gl = struct {
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const single_threaded = b.option(bool, "single_threaded", "Compile in single threaded mode (default depends on target platform)");
 
     const examples = [_]Program{
         .{
@@ -187,20 +192,22 @@ pub fn build(b: *std.Build) !void {
         // },
     };
 
-    const raylib = rl.getModule(b, target, optimize);
-    const raylib_math = rl.math.getModule(b, target, optimize);
-    const rlgl = rl.gl.getModule(b, target, optimize);
+    const raylib = rl.getModule(b, target, optimize, single_threaded);
+    const raylib_math = rl.math.getModule(b, target, optimize, single_threaded);
+    const rlgl = rl.gl.getModule(b, target, optimize, single_threaded);
 
     const raylib_test = b.addTest(.{
         .root_source_file = b.path("lib/raylib.zig"),
         .target = target,
         .optimize = optimize,
+        .single_threaded = single_threaded,
     });
 
     const raylib_math_test = b.addTest(.{
         .root_source_file = b.path("lib/raymath.zig"),
         .target = target,
         .optimize = optimize,
+        .single_threaded = single_threaded,
     });
     raylib_math_test.root_module.addImport("raylib-zig", raylib);
 
@@ -208,6 +215,7 @@ pub fn build(b: *std.Build) !void {
         .root_source_file = b.path("lib/rlgl.zig"),
         .target = target,
         .optimize = optimize,
+        .single_threaded = single_threaded,
     });
     rlgl_test.root_module.addImport("raylib-zig", raylib);
 
@@ -253,7 +261,7 @@ pub fn build(b: *std.Build) !void {
 
             const run_cmd = b.addRunArtifact(exe);
             const run_step = b.step(ex.name, ex.desc);
-            
+
             run_step.dependOn(&run_cmd.step);
             examples_step.dependOn(&exe.step);
         }
