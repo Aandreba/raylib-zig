@@ -3,12 +3,12 @@
     .version = "5.1.0",
     .dependencies = .{
         .raylib = .{
-            .url = "https://github.com/raysan5/raylib/archive/d6b22b17aecd2346d4fd1fc8ebaea8212e40008f.tar.gz",
+            .url = "https://github.com/raysan5/raylib/archive/ae50bfa2cc569c0f8d5bc4315d39db64005b1b08.tar.gz",
             .hash = "12205f45151f556dd41348acc8a93099f19d6a2e830978ace86733ce0bfe52978812",
         },
         .raygui = .{
-            .url = "https://github.com/raysan5/raygui/archive/4b3d94f5df6a5a2aa86286350f7e20c0ca35f516.tar.gz",
-            .hash = "122002d98ca255ec706ef8e5497b3723d6c6e163511761d116dac3aee87747d46cf1",
+            .url = "https://github.com/raysan5/raygui/archive/25c8c65a6e5f0f4d4b564a0343861898c6f2778b.tar.gz",
+            .hash = "1220b64eaeaf55609b3152b64d108ea73981c9689e783bddc68c80e77d275ebac164",
         },
     },
     .minimum_zig_version = "0.12.0",
