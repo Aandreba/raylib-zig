@@ -94,8 +94,7 @@ fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
         });
         lib.addIncludePath(raylib.path("src"));
         lib.addIncludePath(raygui_dep.path("src"));
-
-        lib.installHeader(raygui_dep.path("src/raygui.h"), "raygui.h");
+        lib.installHeader(b.path("lib/raygui.h"), "raygui.h");
 
         b.installArtifact(lib);
         _raylib_lib_cache = lib;
