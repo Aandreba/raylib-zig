@@ -117,6 +117,19 @@ const gl = struct {
     }
 };
 
+const gui = struct {
+    fn getModule(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, single_threaded: ?bool) *std.Build.Module {
+        const raylib = rl.getModule(b, target, optimize, single_threaded);
+        return b.addModule("raygui", .{
+            .root_source_file = b.path("lib/raygui.zig"),
+            .imports = &.{.{ .name = "raylib-zig", .module = raylib }},
+            .target = target,
+            .optimize = optimize,
+            .single_threaded = single_threaded,
+        });
+    }
+};
+
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -198,6 +211,7 @@ pub fn build(b: *std.Build) !void {
     const raylib = rl.getModule(b, target, optimize, single_threaded);
     const raylib_math = rl.math.getModule(b, target, optimize, single_threaded);
     const rlgl = rl.gl.getModule(b, target, optimize, single_threaded);
+    const raygui = rl.gui.getModule(b, target, optimize, single_threaded);
 
     const raylib_test = b.addTest(.{
         .root_source_file = b.path("lib/raylib.zig"),
@@ -222,10 +236,19 @@ pub fn build(b: *std.Build) !void {
     });
     rlgl_test.root_module.addImport("raylib-zig", raylib);
 
+    const raygui_test = b.addTest(.{
+        .root_source_file = b.path("lib/raygui.zig"),
+        .target = target,
+        .optimize = optimize,
+        .single_threaded = single_threaded,
+    });
+    raygui_test.root_module.addImport("raylib-zig", raylib);
+
     const test_step = b.step("test", "Check for library compilation errors");
     test_step.dependOn(&raylib_test.step);
     test_step.dependOn(&raylib_math_test.step);
     test_step.dependOn(&rlgl_test.step);
+    test_step.dependOn(&raygui_test.step);
 
     const examples_step = b.step("examples", "Builds all the examples");
 
@@ -235,6 +258,7 @@ pub fn build(b: *std.Build) !void {
             exe_lib.root_module.addImport("raylib", raylib);
             exe_lib.root_module.addImport("raylib-math", raylib_math);
             exe_lib.root_module.addImport("rlgl", rlgl);
+            exe_lib.root_module.addImport("raygui", raygui);
             const raylib_lib = getRaylib(b, target, optimize, single_threaded);
 
             // Note that raylib itself isn't actually added to the exe_lib
@@ -262,6 +286,7 @@ pub fn build(b: *std.Build) !void {
             exe.root_module.addImport("raylib", raylib);
             exe.root_module.addImport("raylib-math", raylib_math);
             exe.root_module.addImport("rlgl", rlgl);
+            exe.root_module.addImport("raygui", raygui);
 
             const run_cmd = b.addRunArtifact(exe);
             const run_step = b.step(ex.name, ex.desc);
