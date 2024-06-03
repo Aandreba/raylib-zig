@@ -74,11 +74,6 @@ fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
 
         const lib = raylib.artifact("raylib");
 
-        const raygui_dep = b.dependency("raygui", .{
-            .target = target,
-            .optimize = optimize,
-        });
-
         var gen_step = b.addWriteFiles();
         lib.step.dependOn(&gen_step.step);
 
@@ -93,7 +88,7 @@ fn getRaylib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
             },
         });
         lib.addIncludePath(raylib.path("src"));
-        lib.addIncludePath(raygui_dep.path("src"));
+        lib.addIncludePath(b.path("lib"));
         lib.installHeader(b.path("lib/raygui.h"), "raygui.h");
 
         b.installArtifact(lib);

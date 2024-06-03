@@ -6,10 +6,6 @@
             .url = "https://github.com/raysan5/raylib/archive/e47ebec66134800e734710038ea4e5f070f3ef06.tar.gz",
             .hash = "12208edb6d35c0aa5f57262014b02392c6ccfd0685a8eff1d961b42a612d3418fa89",
         },
-        .raygui = .{
-            .url = "https://github.com/raysan5/raygui/archive/25c8c65a6e5f0f4d4b564a0343861898c6f2778b.tar.gz",
-            .hash = "1220b64eaeaf55609b3152b64d108ea73981c9689e783bddc68c80e77d275ebac164",
-        },
     },
     .minimum_zig_version = "0.12.0",
     .paths = .{ "build.zig", "build.zig.zon", "emcc.zig", "lib/raylib.zig", "lib/raylib-ext.zig", "lib/raymath.zig", "lib/raymath-ext.zig", "lib/rlgl.zig", "lib/rlgl-ext.zig", "lib/raygui.zig", "lib/raygui-ext.zig", "lib/raygui.h" },
