@@ -2594,6 +2594,8 @@ int GuiButton(Rectangle bounds, const char *text) {
     // Check button state
     if (CheckCollisionPointRec(mousePoint, bounds)) {
       result = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+      RAYGUI_LOG("%i", result);
+
       if (result)
         state = STATE_PRESSED;
       else
